@@ -1,4 +1,4 @@
-module terraform-provider-hostingde
+module github.com/pub-solar/terraform-provider-hostingde
 
 go 1.18
 

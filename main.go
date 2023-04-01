@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"terraform-provider-hostingde/hostingde"
+
+	"github.com/pub-solar/terraform-provider-hostingde/hostingde"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
