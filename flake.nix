@@ -24,6 +24,7 @@
             go
             errcheck
             go-tools
+            gnumake
           ];
           bash.extra = ''
           '';
