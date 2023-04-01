@@ -1,20 +1,21 @@
 package hostingde
 
-// Adapted from hostingde provider in https://github.com/go-acme/lego
-
 import "encoding/json"
-
-const defaultBaseURL = "https://secure.hosting.de/api/dns/v1/json"
 
 // APIError represents an error in an API response.
 // https://www.hosting.de/api/?json#warnings-and-errors
 type APIError struct {
-	Code          int      `json:"code"`
-	ContextObject string   `json:"contextObject"`
-	ContextPath   string   `json:"contextPath"`
-	Details       []string `json:"details"`
-	Text          string   `json:"text"`
-	Value         string   `json:"value"`
+	Code          int              `json:"code"`
+	ContextObject string           `json:"contextObject"`
+	ContextPath   string           `json:"contextPath"`
+	Details       []APIErrorDetail `json:"details"`
+	Text          string           `json:"text"`
+	Value         string           `json:"value"`
+}
+
+type APIErrorDetail struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Filter is used to filter FindRequests to the API.
@@ -55,11 +56,11 @@ type ZoneConfig struct {
 	NameUnicode           string          `json:"nameUnicode"`
 	MasterIP              string          `json:"masterIp"`
 	Type                  string          `json:"type"`
-	EMailAddress          string          `json:"emailAddress"`
-	ZoneTransferWhitelist []string        `json:"zoneTransferWhitelist"`
+	EMailAddress          string          `json:"emailAddress,omitempty"`
+	ZoneTransferWhitelist []string        `json:"zoneTransferWhitelist,omitempty"`
 	LastChangeDate        string          `json:"lastChangeDate"`
-	DNSServerGroupID      string          `json:"dnsServerGroupId"`
-	DNSSecMode            string          `json:"dnsSecMode"`
+	DNSServerGroupID      string          `json:"dnsServerGroupId,omitempty"`
+	DNSSecMode            string          `json:"dnsSecMode,omitempty"`
 	SOAValues             *SOAValues      `json:"soaValues,omitempty"`
 	TemplateValues        json.RawMessage `json:"templateValues,omitempty"`
 }
@@ -78,7 +79,7 @@ type SOAValues struct {
 // https://www.hosting.de/api/?json#the-record-object
 type DNSRecord struct {
 	ID               string `json:"id,omitempty"`
-	ZoneID           string `json:"zoneId,omitempty"`
+	ZoneID           string `json:"zoneConfigId,omitempty"`
 	RecordTemplateID string `json:"recordTemplateId,omitempty"`
 	Name             string `json:"name,omitempty"`
 	Type             string `json:"type,omitempty"`
@@ -117,7 +118,6 @@ type ZoneCreateRequest struct {
 	*BaseRequest
 	ZoneConfig              `json:"zoneConfig"`
 	Records                 []DNSRecord `json:"records"`
-	RecordsToDelete         []DNSRecord `json:"recordsToDelete"`
 	NameserverSetId         string      `json:"nameserverSetId,omitempty"`
 	UseDefaultNameserverSet bool        `json:"useDefaultNameserverSet,omitempty"`
 }
@@ -141,10 +141,9 @@ type ZoneDeleteRequest struct {
 // https://www.hosting.de/api/?json#deleting-zones
 type ZoneDeleteResponse struct {
 	BaseResponse
-	Status string `json:"status"`
 }
 
-// ZoneConfigsFindRequest represents a API ZonesFind request.
+// ZoneConfigsFindRequest represents a API zoneConfigsFind request.
 // https://www.hosting.de/api/?json#list-zoneconfigs
 type ZoneConfigsFindRequest struct {
 	*BaseRequest
@@ -154,7 +153,7 @@ type ZoneConfigsFindRequest struct {
 	Sort   *Sort         `json:"sort,omitempty"`
 }
 
-// ZoneConfigsFindResponse represents the API response for ZoneConfigsFind.
+// ZoneConfigsFindResponse represents the API response for zoneConfigsFind.
 // https://www.hosting.de/api/?json#list-zoneconfigs
 type ZoneConfigsFindResponse struct {
 	BaseResponse
@@ -165,6 +164,30 @@ type ZoneConfigsFindResponse struct {
 		TotalPages   int          `json:"totalPages"`
 		Type         string       `json:"type"`
 		Data         []ZoneConfig `json:"data"`
+	} `json:"response"`
+}
+
+// ZonesFindRequest represents a API zonesFind request.
+// https://www.hosting.de/api/?json#listing-zones
+type ZonesFindRequest struct {
+	*BaseRequest
+	Filter FilterOrChain `json:"filter"`
+	Limit  int           `json:"limit"`
+	Page   int           `json:"page"`
+	Sort   *Sort         `json:"sort,omitempty"`
+}
+
+// ZonesFindResponse represents the API response for zonesFind.
+// https://www.hosting.de/api/?json#listing-zones
+type ZonesFindResponse struct {
+	BaseResponse
+	Response struct {
+		Limit        int    `json:"limit"`
+		Page         int    `json:"page"`
+		TotalEntries int    `json:"totalEntries"`
+		TotalPages   int    `json:"totalPages"`
+		Type         string `json:"type"`
+		Data         []Zone `json:"data"`
 	} `json:"response"`
 }
 
@@ -192,6 +215,24 @@ type RecordsFindResponse struct {
 	} `json:"response"`
 }
 
+// RecordsUpdateRequest represents a API RecordsUpdate request.
+// https://www.hosting.de/api/?json#updating-records-in-a-zone
+type RecordsUpdateRequest struct {
+	*BaseRequest
+	ZoneConfigId    string      `json:"zoneConfigId"`
+	ZoneName        string      `json:"zoneName"`
+	RecordsToAdd    []DNSRecord `json:"recordsToAdd"`
+	RecordsToModify []DNSRecord `json:"recordsToModify"`
+	RecordsToDelete []DNSRecord `json:"recordsToDelete"`
+}
+
+// RecordsUpdateResponse represents a response from the API.
+// https://www.hosting.de/api/?json#updating-records-in-a-zone
+type RecordsUpdateResponse struct {
+	BaseResponse
+	Response Zone `json:"response"`
+}
+
 // BaseResponse Common response struct.
 // https://www.hosting.de/api/?json#responses
 type BaseResponse struct {
@@ -203,29 +244,29 @@ type BaseResponse struct {
 
 // BaseRequest Common request struct.
 type BaseRequest struct {
-	AuthToken      string `json:"authToken"`
-	OwnerAccountId string `json:"ownerAccountId,omitempty"`
+	AuthToken string `json:"authToken"`
+	AccountId string `json:"ownerAccountId,omitempty"`
 }
 
 func (b *BaseRequest) getAuthToken() string {
 	return b.AuthToken
 }
 
-func (b *BaseRequest) getOwnerAccountId() string {
-	return b.AuthToken
+func (b *BaseRequest) getAccountId() string {
+	return b.AccountId
 }
 
 func (b *BaseRequest) setAuthToken(token string) {
 	b.AuthToken = token
 }
 
-func (b *BaseRequest) setOwnerAccountId(id string) {
-	b.OwnerAccountId = id
+func (b *BaseRequest) setAccountId(id string) {
+	b.AccountId = id
 }
 
 type Request interface {
 	getAuthToken() string
-	getOwnerAccountId() string
+	getAccountId() string
 	setAuthToken(string)
-	setOwnerAccountId(string)
+	setAccountId(string)
 }

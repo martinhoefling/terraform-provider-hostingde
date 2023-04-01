@@ -1,15 +1,14 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/plugin"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"terraform-hostingde/hostingde"
+	"context"
+	"terraform-provider-hostingde/hostingde"
+
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() terraform.ResourceProvider {
-			return hostingde.Provider()
-		},
+	providerserver.Serve(context.Background(), hostingde.New, providerserver.ServeOpts{
+		Address: "registry.terraform.io/hostingde/hostingde",
 	})
 }
