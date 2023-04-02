@@ -12,7 +12,7 @@ const (
 	// such as updating the Makefile and running the testing through that tool.
 	providerConfig = `
 provider "hostingde" {
-  auth_token     = "eQ+BB)*TZa3MqbRhD)b5GgU7ArYh$P-ZKCKhMHbvfj)DM-Lu"
+  #auth_token     = ""
 }
 `
 )

@@ -74,6 +74,8 @@ make install
 
 Run resource tests
 ```shell
+export HOSTINGDE_AUTH_TOKEN=YOUR-API-TOKEN
+
 make testacc
 ```
 
