@@ -6,25 +6,6 @@ Currently only supports maintaining DNS Zones and Records.
 - Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key
 - Optional: `HOSTINGDE_ACCOUNT_ID`
 
-# Development and testing
-
-Compile and install the provider into your `$GOPATH/bin`
-
-```shell
-make install
-```
-
-Then, navigate to the `example` directory. 
-
-```shell
-cd example
-```
-
-Run the following command to initialize the workspace and apply the example configuration.
-
-```shell
-terraform init && terraform apply
-```
 
 ### Example `main.tf`
 ```
@@ -63,3 +44,51 @@ output "hostingde_record" {
   value = hostingde_record.example
 }
 ```
+
+# Development and testing
+Prepare Terraform for local provider install
+```shell
+go env GOBIN
+```
+
+Add your GOBIN PATH to `~/.terraformrc`
+```
+provider_installation {
+
+  dev_overrides {
+      "registry.terraform.io/hostingde/hostingde" = "<PATH>"
+  }
+
+  # For all other providers, install them directly from their origin provider
+  # registries as normal. If you omit this, Terraform will _only_ use
+  # the dev_overrides block, and so no other providers will be available.
+  direct {}
+}
+```
+
+Compile and install the provider into your `$GOPATH/bin`
+
+```shell
+make install
+```
+
+Run resource tests
+```shell
+make testacc
+```
+
+Then, navigate to the `example` directory. 
+
+```shell
+cd example
+```
+
+Run the following command to initialize the workspace and apply the example configuration.
+
+```shell
+terraform init && terraform apply
+```
+
+Useful resources:
+- [Tutorial for Terraform Plugin Framework](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider)
+- [Terraform Plugin Framework documentation](https://developer.hashicorp.com/terraform/plugin/framework)
