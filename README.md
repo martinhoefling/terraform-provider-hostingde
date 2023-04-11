@@ -45,6 +45,82 @@ output "hostingde_record" {
 }
 ```
 
+### Importing existing zones and records
+#### Zones
+- Create `*.tf` files containing the existing zone and records you'd like to import
+- Go to https://secure.hosting.de/dns/ then click "Show details" on the zone you'd like to import
+- Copy the `ZONE_CONFIG_ID` from the URL: https://secure.hosting.de/dns/zones/id/$ZONE_CONFIG_ID/edit
+- Import the `hostingde_zone` resouce using:
+```shell
+terraform import hostingde_zone.your_zone_name $ZONE_CONFIG_ID
+```
+
+#### Records
+- Importing records is a little more involved, let's go:
+- Write a shell function to prepare `curl` JSON data (this assumes you have your
+  API token set in the environment and that you replace `$ZONE_CONFIG_ID` with
+  the ID from above)
+```shell
+generate_post_data()
+{
+  cat <<EOF
+{
+    "authToken": "$HOSTINGDE_AUTH_TOKEN",
+    "filter": {
+        "field": "zoneConfigId",
+        "value": "$ZONE_CONFIG_ID"
+    },
+    "limit": 10,
+    "page": 1,
+    "sort": {
+        "field": "recordName",
+        "order": "asc"
+    }
+}
+EOF
+}
+```
+- Do the curl POST request to get all DNS record IDs of that zone
+```shell
+curl \
+  -H "Accept: application/json" \
+  -H "Content-Type:application/json" \
+  -X POST \
+  -d "$(generate_post_data)" \
+  https://secure.hosting.de/api/dns/v1/json/recordsFind
+```
+- Example response:
+```
+{
+    "errors": [
+    ],
+    "metadata": {
+        "clientTransactionId": "",
+        "serverTransactionId": "20230411151239132-dnsrobot-robots1-26486-0"
+    },
+    "response": {
+        "data": [
+            {
+                "accountId": "ACCOUNT_ID",
+                "addDate": "2023-02-03T13:33:26Z",
+                "comments": "",
+                "content": "\"v=DMARC1; p=reject;\"",
+                "id": "RECORD_ID",
+                "lastChangeDate": "2023-02-03T13:33:26Z",
+                "name": "_dmarc.your.domain",
+                "priority": null,
+                "recordTemplateId": null,
+                "ttl": 3600,
+                "type": "TXT",
+                "zoneConfigId": "ZONE_CONFIG_ID"
+            },
+            ...
+```
+- One by one, import the records:
+```shell
+terraform import hostingde_record.your_record_name $RECORD_ID
+```
+
 # Development and testing
 Prepare Terraform for local provider install
 ```shell
@@ -79,7 +155,7 @@ export HOSTINGDE_AUTH_TOKEN=YOUR-API-TOKEN
 make testacc
 ```
 
-Then, navigate to the `example` directory. 
+Then, navigate to the `example` directory.
 
 ```shell
 cd example
