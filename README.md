@@ -2,13 +2,26 @@
 
 Currently only supports maintaining DNS Zones and Records.
 
+- [Provider documentation](https://registry.terraform.io/providers/pub-solar/hostingde/latest/docs)
+
 ### Environment variables for provider configuration
 - Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key
 - Optional: `HOSTINGDE_ACCOUNT_ID`
 
 ### Quick start
+Copy the example `main.tf`, then run the following commands:
+
+```shell
+export HOSTINGDE_AUTH_TOKEN=your-token
+```
 ```shell
 terraform init
+```
+```shell
+terraform plan -out "hostingde.plan"
+```
+```shell
+terraform apply "hostingde.plan"
 ```
 
 ### Example `main.tf`
@@ -150,6 +163,12 @@ Compile and install the provider into your `$GOPATH/bin`
 
 ```shell
 make install
+```
+
+Generate documentation to `docs/`
+
+```shell
+make docs
 ```
 
 Run resource tests
