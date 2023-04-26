@@ -6,14 +6,18 @@ Currently only supports maintaining DNS Zones and Records.
 - Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key
 - Optional: `HOSTINGDE_ACCOUNT_ID`
 
+### Quick start
+```shell
+terraform init
+```
 
 ### Example `main.tf`
 ```
 terraform {
   required_providers {
     hostingde = {
-      source = "hostingde/hostingde"
-      version = ">= 0.0.1"
+      source = "pub-solar/hostingde"
+      version = ">= 0.0.2"
     }
   }
 }
@@ -132,7 +136,7 @@ Add your GOBIN PATH to `~/.terraformrc`
 provider_installation {
 
   dev_overrides {
-      "registry.terraform.io/hostingde/hostingde" = "<PATH>"
+      "registry.terraform.io/pub-solar/hostingde" = "<PATH>"
   }
 
   # For all other providers, install them directly from their origin provider

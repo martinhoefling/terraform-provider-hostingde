@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     hostingde = {
-      source = "hostingde/hostingde"
-      version = ">= 0.0.1"
+      source = "pub-solar/hostingde"
+      version = ">= 0.0.2"
     }
   }
 }

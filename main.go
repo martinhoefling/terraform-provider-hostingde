@@ -13,6 +13,6 @@ import (
 
 func main() {
 	providerserver.Serve(context.Background(), hostingde.New, providerserver.ServeOpts{
-		Address: "registry.terraform.io/hostingde/hostingde",
+		Address: "registry.terraform.io/pub-solar/hostingde",
 	})
 }
