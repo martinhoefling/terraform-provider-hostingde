@@ -49,28 +49,34 @@ func (r *recordResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description: "DNS record ID",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"zone_id": schema.StringAttribute{
-				Required: true,
+				Description: "ID of DNS zone that the record belongs to.",
+				Required:    true,
 			},
 			"name": schema.StringAttribute{
-				Required: true,
+				Description: "Name of the record. Example: mail.example.com.",
+				Required:    true,
 			},
 			"type": schema.StringAttribute{
-				Required: true,
+				Description: "Type of the DNS record. Valid types are A, AAAA, ALIAS, CAA, CERT, CNAME, DNSKEY, DS, MX, NS, NSEC, NSEC3, NSEC3PARAM, NULLMX, OPENPGPKEY, PTR, RRSIG, SRV, SSHFP, TLSA, and TXT.",
+				Required:    true,
 			},
 			"content": schema.StringAttribute{
-				Required: true,
+				Description: "Content of the DNS record.",
+				Required:    true,
 			},
 			"ttl": schema.Int64Attribute{
-				Computed: true,
-				Required: false,
-				Optional: true,
-				Default:  int64default.StaticInt64(3600),
+				Description: "TTL of the DNS record in seconds.",
+				Computed:    true,
+				Required:    false,
+				Optional:    true,
+				Default:     int64default.StaticInt64(3600),
 			},
 		},
 	}

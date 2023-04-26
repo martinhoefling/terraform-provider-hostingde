@@ -55,24 +55,28 @@ func (r *zoneResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description: "Numeric identifier of the zone.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				Required: true,
+				Description: "Domain name (top-level domain) of the zone.",
+				Required:    true,
 			},
 			"type": schema.StringAttribute{
-				Required: true,
+				Description: "The zone type. Valid types are NATIVE, MASTER, and SLAVE. Changing this forces re-creation of the zone.",
+				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"email": schema.StringAttribute{
-				Computed: true,
-				Required: false,
-				Optional: true,
+				Description: "The hostmaster email address. Only relevant if the type is NATIVE or MASTER. If the field is left empty, the default is hostmaster@name.",
+				Computed:    true,
+				Required:    false,
+				Optional:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

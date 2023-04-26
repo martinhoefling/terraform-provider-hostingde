@@ -42,11 +42,13 @@ func (p *hostingdeProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"account_id": schema.StringAttribute{
-				Optional: true,
+				Description: "Account ID for hosting.de API. May also be provided via HOSTINGDE_ACCOUNT_ID environment variable.",
+				Optional:    true,
 			},
 			"auth_token": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+				Description: "Auth token for hosting.de API. May also be provided via HOSTINGDE_AUTH_TOKEN environment variable.",
+				Optional:    true,
+				Sensitive:   true,
 			},
 		},
 	}
