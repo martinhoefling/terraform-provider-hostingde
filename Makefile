@@ -1,5 +1,7 @@
 default: install
 
+.PHONY: docs install lint testacc
+
 docs:
 	go generate ./...
 
