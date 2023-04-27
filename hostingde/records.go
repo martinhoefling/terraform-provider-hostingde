@@ -28,19 +28,6 @@ func (d *Client) listRecords(findRequest RecordsFindRequest) (*RecordsFindRespon
 	return findResponse, nil
 }
 
-func (d *Client) getRecord(findRequest RecordsFindRequest) (*DNSRecord, error) {
-	var record *DNSRecord
-
-	findResponse, err := d.listRecords(findRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	record = &findResponse.Response.Data[0]
-
-	return record, nil
-}
-
 // https://www.hosting.de/api/?json#updating-records-in-a-zone
 func (c *Client) updateRecords(updateRequest RecordsUpdateRequest) (*RecordsUpdateResponse, error) {
 	uri := defaultBaseURL + "/recordsUpdate"

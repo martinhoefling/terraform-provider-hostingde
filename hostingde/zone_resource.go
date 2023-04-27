@@ -36,15 +36,6 @@ type zoneResourceModel struct {
 	EMailAddress types.String `tfsdk:"email"`
 }
 
-// zoneSOAResourceModel maps the SOAValues resource schema data.
-type zoneSOAResourceModel struct {
-	Refresh     types.Int64 `tfsdk:"refresh"`
-	Retry       types.Int64 `tfsdk:"retry"`
-	Expire      types.Int64 `tfsdk:"expire"`
-	TTL         types.Int64 `tfsdk:"ttl"`
-	NegativeTTL types.Int64 `tfsdk:"negativeTtl"`
-}
-
 // Metadata returns the resource type name.
 func (r *zoneResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_zone"

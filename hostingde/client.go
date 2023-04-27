@@ -23,18 +23,21 @@ type Client struct {
 	baseURL    string
 }
 
-func NewClient(authToken, accountId *string) *Client {
-	c := Client{
-		HTTPClient: &http.Client{Timeout: 10 * time.Second},
-		accountId:  *accountId,
-		authToken:  *authToken,
-		baseURL:    defaultBaseURL,
+func NewClient(accountId, authToken *string) *Client {
+	var account, token string
+
+	if accountId != nil {
+		account = *accountId
 	}
 	if authToken != nil {
-		c.authToken = *authToken
+		token = *authToken
 	}
-	if accountId != nil {
-		c.accountId = *accountId
+
+	c := Client{
+		HTTPClient: &http.Client{Timeout: 10 * time.Second},
+		accountId:  account,
+		authToken:  token,
+		baseURL:    defaultBaseURL,
 	}
 
 	return &c

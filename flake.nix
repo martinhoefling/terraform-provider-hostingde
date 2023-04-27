@@ -25,6 +25,7 @@
             errcheck
             go-tools
             gnumake
+            golangci-lint
           ];
           bash.extra = ''
           '';

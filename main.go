@@ -11,6 +11,7 @@ import (
 // Provider documentation generation.
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name hostingde
 
+//nolint:errcheck
 func main() {
 	providerserver.Serve(context.Background(), hostingde.New, providerserver.ServeOpts{
 		Address: "registry.terraform.io/pub-solar/hostingde",
