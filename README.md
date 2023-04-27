@@ -5,14 +5,14 @@ Currently only supports maintaining DNS Zones and Records.
 - [Provider documentation](https://registry.terraform.io/providers/pub-solar/hostingde/latest/docs)
 
 ### Environment variables for provider configuration
-- Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key
+- Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key (token)
 - Optional: `HOSTINGDE_ACCOUNT_ID`
 
 ### Quick start
 Copy the example `main.tf`, then run the following commands:
 
 ```shell
-export HOSTINGDE_AUTH_TOKEN=your-token
+export HOSTINGDE_AUTH_TOKEN=your-api-token
 ```
 ```shell
 terraform init
