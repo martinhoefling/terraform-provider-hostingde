@@ -13,8 +13,8 @@ Currently only supports maintaining DNS zones and records.
 -> You can configure the provider via environment variables `HOSTINGDE_*`
 
 **Environment variables for provider configuration**
-Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key
-Optional: `HOSTINGDE_ACCOUNT_ID`
+- Required: `HOSTINGDE_AUTH_TOKEN`, go to your [hosting.de profile](https://secure.hosting.de/profile) and create an API Key (token)
+- Optional: `HOSTINGDE_ACCOUNT_ID`
 
 Before continuing, make sure you have created an API token with DNS permissions
 and allow-listed your [external IP address](https://wieistmeineip.de/).
