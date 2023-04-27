@@ -171,6 +171,12 @@ Generate documentation to `docs/`
 make docs
 ```
 
+Run linters
+
+```shell
+make lint
+```
+
 Run resource tests
 ```shell
 export HOSTINGDE_AUTH_TOKEN=YOUR-API-TOKEN

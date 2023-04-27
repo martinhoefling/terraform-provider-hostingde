@@ -125,8 +125,7 @@ func (p *hostingdeProvider) Configure(ctx context.Context, req provider.Configur
 	tflog.Debug(ctx, "Creating hosting.de client")
 
 	// Create a new hosting.de client using the configuration values
-	client := NewClient(&auth_token, &account_id)
-	//client := NewClient(&account_id, &auth_token)
+	client := NewClient(&account_id, &auth_token)
 
 	// Make the hosting.de client available during DataSource and Resource
 	// type Configure methods.

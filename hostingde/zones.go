@@ -1,87 +1,10 @@
 package hostingde
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
-
-	"github.com/cenkalti/backoff/v4"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
-
-func (c *Client) findZoneConfig(tfCtx context.Context, findRequest ZoneConfigsFindRequest) (*ZoneConfig, error) {
-	var zoneConfig *ZoneConfig
-	ctx, cancel := context.WithCancel(context.Background())
-
-	operation := func() error {
-
-		findResponse, err := c.listZoneConfigs(findRequest)
-		if err != nil {
-			tflog.Error(tfCtx, fmt.Sprintf("listZoneConfigs failed: %s", err))
-			cancel()
-			return err
-		}
-
-		if findResponse.Response.Data[0].Status != "active" {
-			return fmt.Errorf("unexpected status: %q", findResponse.Response.Data[0].Status)
-		}
-
-		zoneConfig = &findResponse.Response.Data[0]
-		return nil
-	}
-
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = 3 * time.Second
-	bo.MaxInterval = 10 * bo.InitialInterval
-	bo.MaxElapsedTime = 100 * bo.InitialInterval
-
-	// Retry in case the zone was edited recently and is not yet active
-	err := backoff.Retry(operation, backoff.WithContext(bo, ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	return zoneConfig, nil
-}
-
-// https://www.hosting.de/api/?json#list-zoneconfigs
-func (c *Client) listZoneConfigs(findRequest ZoneConfigsFindRequest) (*ZoneConfigsFindResponse, error) {
-	uri := defaultBaseURL + "/zoneConfigsFind"
-
-	findResponse := &ZoneConfigsFindResponse{}
-
-	rawResp, err := c.doRequest(http.MethodPost, uri, findRequest, findResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(findResponse.Response.Data) == 0 {
-		return nil, fmt.Errorf("%v: uri: %s %s", err, uri, rawResp)
-	}
-
-	if findResponse.Status != "success" && findResponse.Status != "pending" {
-		return findResponse, errors.New(toErrorWithNewlines(uri, rawResp))
-	}
-
-	return findResponse, nil
-}
-
-func getZoneConfig(tfCtx context.Context, zoneId string, c *Client) (*ZoneConfig, error) {
-	zoneFindReq := ZoneConfigsFindRequest{
-		BaseRequest: &BaseRequest{},
-		Filter: FilterOrChain{Filter: Filter{
-			Field: "ZoneConfigId",
-			Value: zoneId,
-		}},
-		Limit: 1,
-		Page:  1,
-	}
-	zoneConfig, err := c.findZoneConfig(tfCtx, zoneFindReq)
-
-	return zoneConfig, err
-}
 
 // https://www.hosting.de/api/?json#listing-zones
 func (c *Client) listZones(findRequest ZonesFindRequest) (*ZonesFindResponse, error) {
