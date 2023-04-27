@@ -59,7 +59,6 @@ func (c *Client) doRequestIter(httpMethod string, uri string, request Request, r
 		return nil, err
 	}
 
-	fmt.Println(string(rawBody))
 	req, err := http.NewRequest(httpMethod, uri, bytes.NewReader(rawBody))
 	if err != nil {
 		return nil, err
@@ -123,7 +122,7 @@ func (c *Client) doRequestIter(httpMethod string, uri string, request Request, r
 			}
 		}
 		if blocked {
-			fmt.Printf("Request blocked, triggering new request: %d", iteration)
+			fmt.Printf("Request blocked, triggering new request: %d\n", iteration)
 			time.Sleep(1 * time.Second)
 			return c.doRequestIter(httpMethod, uri, request, response, iteration)
 		}
