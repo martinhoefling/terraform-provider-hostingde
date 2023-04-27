@@ -1,9 +1,8 @@
 module github.com/pub-solar/terraform-provider-hostingde
 
-go 1.18
+go 1.20
 
 require (
-	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-go v0.14.3
