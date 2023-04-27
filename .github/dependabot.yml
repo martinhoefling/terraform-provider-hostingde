@@ -1,0 +1,11 @@
+# Basic dependabot.yml file with
+# minimum configuration for Go modules
+
+version: 2
+updates:
+  # Enable version updates for Go modules
+  - package-ecosystem: "gomod"
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
