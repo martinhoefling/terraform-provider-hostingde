@@ -37,6 +37,7 @@ type recordResourceModel struct {
 	Type    types.String `tfsdk:"type"`
 	Content types.String `tfsdk:"content"`
 	TTL     types.Int64  `tfsdk:"ttl"`
+	Priority     types.Int64  `tfsdk:"priority"`
 }
 
 // Metadata returns the resource type name.
@@ -72,11 +73,18 @@ func (r *recordResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Required:    true,
 			},
 			"ttl": schema.Int64Attribute{
-				Description: "TTL of the DNS record in seconds.",
+				Description: "TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926.",
 				Computed:    true,
 				Required:    false,
 				Optional:    true,
 				Default:     int64default.StaticInt64(3600),
+			},
+			"priority": schema.Int64Attribute{
+				Description: "Priority of MX and SRV records.",
+				Computed:    true,
+				Required:    false,
+				Optional:    true,
+				Default:     int64default.StaticInt64(10),
 			},
 		},
 	}
@@ -99,6 +107,7 @@ func (r *recordResource) Create(ctx context.Context, req resource.CreateRequest,
 		Type:    plan.Type.ValueString(),
 		Content: plan.Content.ValueString(),
 		TTL:     int(plan.TTL.ValueInt64()),
+		Priority:     int(plan.Priority.ValueInt64()),
 	}
 
 	recordReq := RecordsUpdateRequest{
@@ -130,6 +139,10 @@ func (r *recordResource) Create(ctx context.Context, req resource.CreateRequest,
 	plan.Type = types.StringValue(returnedRecord.Type)
 	plan.Content = types.StringValue(returnedRecord.Content)
 	plan.TTL = types.Int64Value(int64(returnedRecord.TTL))
+
+	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
+		plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
+	}
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -169,13 +182,18 @@ func (r *recordResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
+	returnedRecord := recordResp.Response.Data[0];
 	// Overwrite DNS record with refreshed state
-	state.ZoneID = types.StringValue(recordResp.Response.Data[0].ZoneID)
-	state.ID = types.StringValue(recordResp.Response.Data[0].ID)
-	state.Name = types.StringValue(recordResp.Response.Data[0].Name)
-	state.Type = types.StringValue(recordResp.Response.Data[0].Type)
-	state.Content = types.StringValue(recordResp.Response.Data[0].Content)
-	state.TTL = types.Int64Value(int64(recordResp.Response.Data[0].TTL))
+	state.ZoneID = types.StringValue(returnedRecord.ZoneID)
+	state.ID = types.StringValue(returnedRecord.ID)
+	state.Name = types.StringValue(returnedRecord.Name)
+	state.Type = types.StringValue(returnedRecord.Type)
+	state.Content = types.StringValue(returnedRecord.Content)
+	state.TTL = types.Int64Value(int64(returnedRecord.TTL))
+
+	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
+		state.Priority = types.Int64Value(int64(returnedRecord.Priority))
+	}
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -203,6 +221,7 @@ func (r *recordResource) Update(ctx context.Context, req resource.UpdateRequest,
 		Type:    plan.Type.ValueString(),
 		Content: plan.Content.ValueString(),
 		TTL:     int(plan.TTL.ValueInt64()),
+		Priority:     int(plan.Priority.ValueInt64()),
 	}
 
 	recordReq := RecordsUpdateRequest{
@@ -234,6 +253,11 @@ func (r *recordResource) Update(ctx context.Context, req resource.UpdateRequest,
 	plan.Type = types.StringValue(returnedRecord.Type)
 	plan.Content = types.StringValue(returnedRecord.Content)
 	plan.TTL = types.Int64Value(int64(returnedRecord.TTL))
+
+	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
+		plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
+	}
+
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)

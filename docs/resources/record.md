@@ -19,6 +19,7 @@ resource "hostingde_record" "example" {
   name = "test.example.test"
   type = "CNAME"
   content = "www.example.com"
+  ttl = 300
 }
 ```
 
@@ -34,7 +35,8 @@ resource "hostingde_record" "example" {
 
 ### Optional
 
-- `ttl` (Number) TTL of the DNS record in seconds.
+- `priority` (Number) Priority of MX and SRV records.
+- `ttl` (Number) TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926.
 
 ### Read-Only
 

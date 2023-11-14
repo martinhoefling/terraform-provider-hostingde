@@ -1,5 +1,5 @@
 {
-  description = "devs & ops environment for nix'ing with triton";
+  description = "hosting.de terraform provider";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -14,7 +14,7 @@
   outputs = { self, flake-utils, devshell, nixpkgs }:
     flake-utils.lib.simpleFlake {
       inherit self nixpkgs;
-      name = "infra-project";
+      name = "hosting.de terraform provider";
       overlay = devshell.overlays.default;
       shell = { pkgs }:
         pkgs.devshell.mkShell {
@@ -28,6 +28,8 @@
             golangci-lint
           ];
           bash.extra = ''
+            export GOPATH=~/.local/share/go
+            export PATH=$GOPATH:$PATH
           '';
         };
     };
