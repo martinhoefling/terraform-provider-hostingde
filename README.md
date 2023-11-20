@@ -196,6 +196,15 @@ Run the following command to initialize the workspace and apply the example conf
 terraform init && terraform apply
 ```
 
+Publishing a new version is done by pushing a new git tag. The [goreleaser CI](https://github.com/pub-solar/terraform-provider-hostingde/actions/workflows/release.yml)
+job will pick up the new tag, then build and publish a new release.
+
+```shell
+# If the old version was v0.0.6, increment by one to v0.0.7
+git tag v<new-version>
+git push --follow-tags
+```
+
 Useful resources:
 - [Tutorial for Terraform Plugin Framework](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider)
 - [Terraform Plugin Framework documentation](https://developer.hashicorp.com/terraform/plugin/framework)
