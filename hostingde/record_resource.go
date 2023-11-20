@@ -31,13 +31,13 @@ type recordResource struct {
 
 // recordResourceModel maps the DNSRecord resource schema data.
 type recordResourceModel struct {
-	ID      types.String `tfsdk:"id"`
-	ZoneID  types.String `tfsdk:"zone_id"`
-	Name    types.String `tfsdk:"name"`
-	Type    types.String `tfsdk:"type"`
-	Content types.String `tfsdk:"content"`
-	TTL     types.Int64  `tfsdk:"ttl"`
-	Priority     types.Int64  `tfsdk:"priority"`
+	ID       types.String `tfsdk:"id"`
+	ZoneID   types.String `tfsdk:"zone_id"`
+	Name     types.String `tfsdk:"name"`
+	Type     types.String `tfsdk:"type"`
+	Content  types.String `tfsdk:"content"`
+	TTL      types.Int64  `tfsdk:"ttl"`
+	Priority types.Int64  `tfsdk:"priority"`
 }
 
 // Metadata returns the resource type name.
@@ -215,13 +215,13 @@ func (r *recordResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	// Generate API request body from plan
 	record := DNSRecord{
-		Name:    plan.Name.ValueString(),
-		ID:      plan.ID.ValueString(),
-		ZoneID:  plan.ZoneID.ValueString(),
-		Type:    plan.Type.ValueString(),
-		Content: plan.Content.ValueString(),
-		TTL:     int(plan.TTL.ValueInt64()),
-		Priority:     int(plan.Priority.ValueInt64()),
+		Name:     plan.Name.ValueString(),
+		ID:       plan.ID.ValueString(),
+		ZoneID:   plan.ZoneID.ValueString(),
+		Type:     plan.Type.ValueString(),
+		Content:  plan.Content.ValueString(),
+		TTL:      int(plan.TTL.ValueInt64()),
+		Priority: int(plan.Priority.ValueInt64()),
 	}
 
 	recordReq := RecordsUpdateRequest{
@@ -257,7 +257,6 @@ func (r *recordResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
 		plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
 	}
-
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
