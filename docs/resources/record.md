@@ -19,6 +19,17 @@ resource "hostingde_record" "example" {
   name = "test.example.test"
   type = "CNAME"
   content = "www.example.com"
+  ttl = 300
+}
+
+# Manage example DNS MX record.
+resource "hostingde_record" "example" {
+  zone_id = hostingde_zone.sample.id
+  name = "test.example.test"
+  type = "MX"
+  content = "mail.example.com"
+  ttl = 300
+  priority = 10
 }
 ```
 
@@ -34,7 +45,8 @@ resource "hostingde_record" "example" {
 
 ### Optional
 
-- `ttl` (Number) TTL of the DNS record in seconds.
+- `priority` (Number) Priority of MX and SRV records. Defaults to 10.
+- `ttl` (Number) TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926. Defaults to 3600.
 
 ### Read-Only
 
