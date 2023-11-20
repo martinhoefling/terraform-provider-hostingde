@@ -73,14 +73,14 @@ func (r *recordResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Required:    true,
 			},
 			"ttl": schema.Int64Attribute{
-				Description: "TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926.",
+				Description: "TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926. Defaults to 3600.",
 				Computed:    true,
 				Required:    false,
 				Optional:    true,
 				Default:     int64default.StaticInt64(3600),
 			},
 			"priority": schema.Int64Attribute{
-				Description: "Priority of MX and SRV records.",
+				Description: "Priority of MX and SRV records. Defaults to 10.",
 				Computed:    true,
 				Required:    false,
 				Optional:    true,
