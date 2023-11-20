@@ -1,26 +1,25 @@
 {
   description = "hosting.de terraform provider";
 
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs.devshell.url = "github:numtide/devshell";
+  inputs.flake-parts.url = "github:hercules-ci/flake-parts";
 
-    flake-utils.url = "github:numtide/flake-utils";
+  outputs = inputs@{ self, flake-parts, devshell, nixpkgs }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        devshell.flakeModule
+      ];
 
-    devshell.url = "github:numtide/devshell";
-    devshell.inputs.flake-utils.follows = "flake-utils";
-    devshell.inputs.nixpkgs.follows = "nixpkgs";
-  };
+      systems = [
+        "x86_64-linux"
+      ];
 
-  outputs = { self, flake-utils, devshell, nixpkgs }:
-    flake-utils.lib.simpleFlake {
-      inherit self nixpkgs;
-      name = "hosting.de terraform provider";
-      overlay = devshell.overlays.default;
-      shell = { pkgs }:
-        pkgs.devshell.mkShell {
+      perSystem = { pkgs, ... }: {
+        devshells.default = {
           # Add additional packages you'd like to be available in your devshell
           # PATH here
-          devshell.packages = with pkgs; [
+          packages = with pkgs; [
             go
             errcheck
             go-tools
@@ -29,8 +28,9 @@
           ];
           bash.extra = ''
             export GOPATH=~/.local/share/go
-            export PATH=$GOPATH:$PATH
+            export PATH=$GOPATH/bin:$PATH
           '';
         };
+      };
     };
 }
