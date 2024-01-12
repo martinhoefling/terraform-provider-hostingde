@@ -45,7 +45,7 @@ resource "hostingde_record" "example" {
 
 ### Optional
 
-- `priority` (Number) Priority of MX and SRV records. Defaults to 10.
+- `priority` (Number) Priority of MX and SRV records.
 - `ttl` (Number) TTL of the DNS record in seconds. Minimum is 60, maximum is 31556926. Defaults to 3600.
 
 ### Read-Only
