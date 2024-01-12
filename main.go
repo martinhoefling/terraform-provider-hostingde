@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"log"
 
 	"github.com/pub-solar/terraform-provider-hostingde/hostingde"
 
@@ -13,7 +15,19 @@ import (
 
 //nolint:errcheck
 func main() {
-	providerserver.Serve(context.Background(), hostingde.New, providerserver.ServeOpts{
+	var debug bool
+
+	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
+
+	opts := providerserver.ServeOpts{
 		Address: "registry.terraform.io/pub-solar/hostingde",
-	})
+		Debug:   debug,
+	}
+
+	err := providerserver.Serve(context.Background(), hostingde.New, opts)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
