@@ -3,12 +3,14 @@ package hostingde
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -78,13 +80,15 @@ func (r *recordResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Required:    false,
 				Optional:    true,
 				Default:     int64default.StaticInt64(3600),
+				Validators: []validator.Int64{
+					int64validator.Between(60, 31556926),
+				},
 			},
 			"priority": schema.Int64Attribute{
-				Description: "Priority of MX and SRV records. Defaults to 10.",
+				Description: "Priority of MX and SRV records.",
 				Computed:    true,
 				Required:    false,
 				Optional:    true,
-				Default:     int64default.StaticInt64(10),
 			},
 		},
 	}
@@ -102,12 +106,12 @@ func (r *recordResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// Generate API request body from plan
 	record := DNSRecord{
-		Name:    plan.Name.ValueString(),
-		ZoneID:  plan.ZoneID.ValueString(),
-		Type:    plan.Type.ValueString(),
-		Content: plan.Content.ValueString(),
-		TTL:     int(plan.TTL.ValueInt64()),
-		Priority:     int(plan.Priority.ValueInt64()),
+		Name:     plan.Name.ValueString(),
+		ZoneID:   plan.ZoneID.ValueString(),
+		Type:     plan.Type.ValueString(),
+		Content:  plan.Content.ValueString(),
+		TTL:      int(plan.TTL.ValueInt64()),
+		Priority: int(plan.Priority.ValueInt64()),
 	}
 
 	recordReq := RecordsUpdateRequest{
@@ -139,10 +143,7 @@ func (r *recordResource) Create(ctx context.Context, req resource.CreateRequest,
 	plan.Type = types.StringValue(returnedRecord.Type)
 	plan.Content = types.StringValue(returnedRecord.Content)
 	plan.TTL = types.Int64Value(int64(returnedRecord.TTL))
-
-	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
-		plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
-	}
+	plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
 
 	// Set state to fully populated data
 	diags = resp.State.Set(ctx, plan)
@@ -182,7 +183,7 @@ func (r *recordResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	returnedRecord := recordResp.Response.Data[0];
+	returnedRecord := recordResp.Response.Data[0]
 	// Overwrite DNS record with refreshed state
 	state.ZoneID = types.StringValue(returnedRecord.ZoneID)
 	state.ID = types.StringValue(returnedRecord.ID)
@@ -190,10 +191,7 @@ func (r *recordResource) Read(ctx context.Context, req resource.ReadRequest, res
 	state.Type = types.StringValue(returnedRecord.Type)
 	state.Content = types.StringValue(returnedRecord.Content)
 	state.TTL = types.Int64Value(int64(returnedRecord.TTL))
-
-	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
-		state.Priority = types.Int64Value(int64(returnedRecord.Priority))
-	}
+	state.Priority = types.Int64Value(int64(returnedRecord.Priority))
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -253,10 +251,7 @@ func (r *recordResource) Update(ctx context.Context, req resource.UpdateRequest,
 	plan.Type = types.StringValue(returnedRecord.Type)
 	plan.Content = types.StringValue(returnedRecord.Content)
 	plan.TTL = types.Int64Value(int64(returnedRecord.TTL))
-
-	if (returnedRecord.Type == "MX" || returnedRecord.Type == "SRV") {
-		plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
-	}
+	plan.Priority = types.Int64Value(int64(returnedRecord.Priority))
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -311,4 +306,40 @@ func (r *recordResource) Configure(_ context.Context, req resource.ConfigureRequ
 func (r *recordResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *recordResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	// Retrieve values from config
+	var configData recordResourceModel
+	diags := req.Config.Get(ctx, &configData)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If Type is MX or SRV, return without warning.
+	if configData.Type.ValueString() == "MX" || configData.Type.ValueString() == "SRV" {
+		if configData.Priority.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("Priority"),
+				"Missing attribute",
+				"Setting priority is required for records of type MX or SRV. "+
+					"Please add a priority to the resource, for example priority = 0.",
+			)
+		}
+		return
+	}
+
+	// If Priority is not configured, return without warning.
+	if configData.Priority.IsNull() || configData.Priority.IsUnknown() {
+		return
+	}
+
+	resp.Diagnostics.AddAttributeError(
+		path.Root("Type"),
+		"Unexpected combination of attributes",
+		"Priority is only relevant for records of type MX or SRV. "+
+			"Please remove priority from the resource or change its type.",
+	)
 }
